@@ -59,6 +59,14 @@ export ELEVENLABS_API_KEY=your_key
 pnpm dlx podcast-helper transcribe https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3 --output-dir ./out/smoke --json
 ```
 
+Apple Silicon local transcription with `mlx-whisper`:
+
+```bash
+brew install ffmpeg
+python3 -m pip install mlx-whisper
+npx podcast-helper transcribe https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3 --engine mlx-whisper --output-dir ./out/mlx --json
+```
+
 If you prefer a persistent install:
 
 ```bash
@@ -114,6 +122,13 @@ Transcribe a local audio file:
 ```bash
 export ELEVENLABS_API_KEY=your_key
 podcast-helper transcribe ./audio/interview.mp3 --output-dir ./out/local --json
+```
+
+Transcribe locally on Apple Silicon with `mlx-whisper`:
+
+```bash
+python3 -m pip install mlx-whisper
+podcast-helper transcribe ./audio/interview.mp3 --engine mlx-whisper --output-dir ./out/local-mlx --json
 ```
 
 Example output:
@@ -195,6 +210,13 @@ Run live transcription tests:
 
 ```bash
 export ELEVENLABS_API_KEY=your_key
+pnpm run test:live
+```
+
+Run the local `mlx-whisper` live test:
+
+```bash
+export MLX_WHISPER_PYTHON="$(which python3)"
 pnpm run test:live
 ```
 

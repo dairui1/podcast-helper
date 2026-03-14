@@ -59,6 +59,14 @@ export ELEVENLABS_API_KEY=你的_key
 pnpm dlx podcast-helper transcribe https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3 --output-dir ./out/smoke --json
 ```
 
+Apple Silicon 本地转录，使用 `mlx-whisper`：
+
+```bash
+brew install ffmpeg
+python3 -m pip install mlx-whisper
+npx podcast-helper transcribe https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3 --engine mlx-whisper --output-dir ./out/mlx --json
+```
+
 如果希望长期可用，也可以全局安装：
 
 ```bash
@@ -114,6 +122,13 @@ pnpm dlx podcast-helper transcribe https://storage.googleapis.com/eleven-public-
 ```bash
 export ELEVENLABS_API_KEY=你的_key
 podcast-helper transcribe ./audio/interview.mp3 --output-dir ./out/local --json
+```
+
+在 Apple Silicon 上使用 `mlx-whisper` 做本地转录：
+
+```bash
+python3 -m pip install mlx-whisper
+podcast-helper transcribe ./audio/interview.mp3 --engine mlx-whisper --output-dir ./out/local-mlx --json
 ```
 
 示例输出：
@@ -195,6 +210,13 @@ pnpm run format
 
 ```bash
 export ELEVENLABS_API_KEY=你的_key
+pnpm run test:live
+```
+
+运行本地 `mlx-whisper` live test：
+
+```bash
+export MLX_WHISPER_PYTHON="$(which python3)"
 pnpm run test:live
 ```
 

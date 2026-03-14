@@ -29,6 +29,7 @@
   },
   "files": [
     "dist",
+    "scripts",
     "skills"
   ],
   "engines": {
@@ -47,7 +48,7 @@
     "audit": "pnpm audit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:live": "vitest run test/live.transcribe.test.ts",
+    "test:live": "vitest run test/live*.test.ts",
     "prepublishOnly": "pnpm run check && pnpm run build"
   },
   "dependencies": {

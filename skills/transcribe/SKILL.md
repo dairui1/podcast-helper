@@ -17,6 +17,7 @@ Use this skill when the user wants any of the following:
 - Generate plain transcript files (`.txt`)
 - Clean a raw transcript after transcription
 - Fix obvious ASR mistakes with episode-page context
+- Run local transcription on Apple Silicon
 
 ## Inputs
 
@@ -40,6 +41,11 @@ podcast-helper transcribe ./audio/interview.mp3 --output-dir ./out/local --json
 - The CLI can be invoked from npm with `npx` or `pnpm dlx`, or run from the repository
 - Cleanup with Jina Reader is optional and does not require ElevenLabs
 
+For Apple Silicon local transcription with `mlx-whisper`:
+
+- `ffmpeg` must be installed
+- `python3 -m pip install mlx-whisper`
+
 Check the API key first if transcription is expected to run:
 
 ```bash
@@ -52,6 +58,12 @@ Prefer machine-readable output:
 
 ```bash
 npx podcast-helper transcribe <input> --output-dir <dir> --json
+```
+
+For Apple Silicon local transcription:
+
+```bash
+npx podcast-helper transcribe <input> --engine mlx-whisper --output-dir <dir> --json
 ```
 
 Why:
@@ -112,6 +124,8 @@ Use this order of preference:
 3. `podcast-helper transcribe ...`
 4. In this repository: `node dist/cli.js transcribe ...`
 
+If the user explicitly wants local transcription on Apple Silicon, prefer `--engine mlx-whisper`.
+
 Do not default to repository build instructions unless you are already working inside this repository.
 
 If you are inside the repository and `dist/cli.js` is missing, build first:
@@ -133,6 +147,7 @@ node dist/cli.js transcribe <input> --output-dir <dir> --json
 - Use a dedicated output directory per task.
 - Report the generated artifact paths back to the user.
 - Prefer `npx` or `pnpm dlx` when the user does not already have the CLI installed.
+- If the user wants local or offline transcription on Apple Silicon, switch to `--engine mlx-whisper`.
 - If the input is a Xiaoyuzhou episode, the CLI resolves and downloads the source audio automatically.
 - After transcription, if the user appears to want a polished transcript, ask whether they also want cleanup.
 
