@@ -15,6 +15,7 @@ describe("transcribe workflow", () => {
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     await rm(tempDir, { recursive: true, force: true });
   });
 
@@ -71,5 +72,44 @@ describe("transcribe workflow", () => {
       "Hello world.\nThis is a test transcript.\n"
     );
     expect(onEvent).toHaveBeenCalled();
+  });
+
+  test("falls back to downloading a direct remote audio URL when no source adapter matches", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        return new Response(Buffer.from("remote-mp3"), {
+          status: 200,
+          headers: {
+            "content-type": "audio/mpeg",
+          },
+        });
+      })
+    );
+
+    const provider: SttProvider = {
+      name: "fake",
+      async transcribe({ audioPath }: { audioPath: string }) {
+        expect(audioPath.endsWith(".mp3")).toBe(true);
+        expect(await readFile(audioPath, "utf8")).toBe("remote-mp3");
+
+        return {
+          text: "Remote audio transcript.\n",
+          segments: [{ startMs: 0, endMs: 1000, text: "Remote audio transcript." }],
+          language: "en",
+        };
+      },
+    };
+
+    const result = await transcribeInput({
+      input: "https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3",
+      outputDir: tempDir,
+      sourceAdapters: [],
+      provider,
+    });
+
+    expect(result.source).toBe("remote-audio-url");
+    expect(result.artifacts.audio).toContain("nicole.mp3");
+    expect(await readFile(result.artifacts.txt, "utf8")).toBe("Remote audio transcript.\n");
   });
 });

@@ -12,7 +12,7 @@ const program = new Command()
 
 program
   .command("transcribe")
-  .argument("<input>", "Episode URL or local audio file")
+  .argument("<input>", "Episode URL, direct audio URL, or local audio file")
   .option("-o, --output-dir <dir>", "Directory for generated artifacts", process.cwd())
   .option("--model <model>", "ElevenLabs transcription model", "scribe_v2")
   .option("--language <code>", "Force transcription language")

@@ -3,7 +3,7 @@ import { basename, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { renderSrt, renderTxt } from "../output/transcript";
-import type { ResolvedEpisode, SourceAdapter } from "../sources";
+import type { SourceAdapter } from "../sources";
 import type { SttProvider } from "./provider";
 import type { WorkflowEvent } from "./types";
 
@@ -82,7 +82,32 @@ async function materializeAudioInput(options: {
   if (looksLikeUrl(options.input)) {
     const adapter = options.sourceAdapters.find((candidate) => candidate.canResolve(options.input));
     if (!adapter) {
-      throw new Error(`No source adapter matched input: ${options.input}`);
+      const remoteAudio = resolveRemoteAudioInput(options.input);
+      const audioPath = join(
+        options.outputDir,
+        `${remoteAudio.suggestedBaseName}${remoteAudio.audioExtension}`
+      );
+
+      options.onEvent?.({
+        type: "download.started",
+        message: "Downloading remote audio.",
+        data: { audioUrl: options.input },
+      });
+
+      await downloadAudio(options.input, audioPath);
+
+      options.onEvent?.({
+        type: "download.completed",
+        message: "Downloaded remote audio.",
+        data: { audioPath },
+      });
+
+      return {
+        source: remoteAudio.source,
+        episodeId: remoteAudio.episodeId,
+        baseName: remoteAudio.suggestedBaseName,
+        audioPath,
+      };
     }
 
     options.onEvent?.({
@@ -108,7 +133,7 @@ async function materializeAudioInput(options: {
       data: { audioUrl: resolved.audioUrl },
     });
 
-    await downloadAudio(resolved, audioPath);
+    await downloadAudio(resolved.audioUrl, audioPath);
     options.onEvent?.({
       type: "download.completed",
       message: "Downloaded source audio.",
@@ -139,13 +164,13 @@ async function materializeAudioInput(options: {
   };
 }
 
-async function downloadAudio(resolved: ResolvedEpisode, destination: string): Promise<void> {
-  if (resolved.audioUrl.startsWith("file://")) {
-    await copyFile(fileURLToPath(resolved.audioUrl), destination);
+async function downloadAudio(audioUrl: string, destination: string): Promise<void> {
+  if (audioUrl.startsWith("file://")) {
+    await copyFile(fileURLToPath(audioUrl), destination);
     return;
   }
 
-  const response = await fetch(resolved.audioUrl);
+  const response = await fetch(audioUrl);
   if (!response.ok) {
     throw new Error(`Failed to download audio: ${response.status} ${response.statusText}`);
   }
@@ -161,4 +186,29 @@ function looksLikeUrl(input: string): boolean {
   } catch {
     return false;
   }
+}
+
+function resolveRemoteAudioInput(input: string): {
+  source: string;
+  episodeId?: string;
+  title?: string;
+  suggestedBaseName: string;
+  audioExtension: string;
+} {
+  const url = new URL(input);
+  const pathname = url.pathname;
+  const rawExtension = extname(pathname).toLowerCase();
+  const audioExtension = rawExtension || ".audio";
+  const rawBaseName = basename(pathname, rawExtension || undefined);
+  const suggestedBaseName = sanitizeBaseName(rawBaseName || "remote-audio");
+
+  return {
+    source: "remote-audio-url",
+    suggestedBaseName,
+    audioExtension,
+  };
+}
+
+function sanitizeBaseName(value: string): string {
+  return value.replace(/[^A-Za-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "") || "remote-audio";
 }
