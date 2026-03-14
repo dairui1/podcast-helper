@@ -84,33 +84,29 @@ node dist/cli.js transcribe https://www.xiaoyuzhoufm.com/episode/69b4d2f9f8b8079
 
 ## Agent Skill
 
-这个仓库也提供了转录和转录后清洗两个 agent skill。
+这个仓库现在提供一个完整的 agent skill，覆盖整条 transcript 工作流：
 
-安装转录 skill：
+- 转录播客音频
+- 生成 `音频 + SRT + TXT`
+- 在需要时结合 Jina Reader 做 transcript 清洗
+
+安装 skill：
 
 ```bash
 npx skills add dairui1/podcast-helper --skill transcribe
-```
-
-安装 transcript 清洗 skill：
-
-```bash
-npx skills add dairui1/podcast-helper --skill clean-transcript
 ```
 
 全局安装：
 
 ```bash
 npx skills add dairui1/podcast-helper --skill transcribe -g
-npx skills add dairui1/podcast-helper --skill clean-transcript -g
 ```
 
 skill 文件在：
 
 - [skills/transcribe/SKILL.md](./skills/transcribe/SKILL.md)
-- [skills/clean-transcript/SKILL.md](./skills/clean-transcript/SKILL.md)
 
-`transcribe` skill 会引导 agent 优先使用：
+这个 skill 会引导 agent 优先使用：
 
 ```bash
 podcast-helper transcribe <input> --output-dir <dir> --json
@@ -122,13 +118,13 @@ podcast-helper transcribe <input> --output-dir <dir> --json
 https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3
 ```
 
-`clean-transcript` skill 设计成在转录之后继续使用，它会通过 Jina Reader：
+在转录完成后，同一个 skill 会引导 agent 询问用户是否还要清洗 transcript。如果用户同意，就会通过 Jina Reader：
 
 ```bash
 https://r.jina.ai/<播客url>
 ```
 
-抓取节目页面内容作为外部上下文，帮助修正常见的同音错别字、专有名词识别错误，以及冗余语气词。
+抓取节目页面内容作为外部上下文，帮助修正常见的同音错别字、专有名词识别错误，以及冗余语气词，并生成一个并列的 cleaned transcript 文件，不覆盖原始文本。
 
 ## 开发
 

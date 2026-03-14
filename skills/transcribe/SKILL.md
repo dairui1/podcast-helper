@@ -1,10 +1,10 @@
 ---
 name: transcribe
-description: Use podcast-helper to transcribe podcast audio into original audio, SRT subtitles, and TXT transcripts. Use when the user asks to transcribe a podcast episode, generate subtitles, extract a transcript from an audio file, or turn a Xiaoyuzhou episode URL or direct audio URL into text artifacts.
-allowed-tools: Bash(podcast-helper:*), Bash(npx podcast-helper:*), Bash(node dist/cli.js:*), Bash(pnpm run build:*)
+description: Use podcast-helper to transcribe podcast audio into original audio, SRT subtitles, and TXT transcripts, then optionally clean the transcript with episode-page context. Use when the user asks to transcribe a podcast episode, generate subtitles, extract a transcript from an audio file, or polish a raw transcript using the podcast page.
+allowed-tools: Bash(curl:*), Bash(podcast-helper:*), Bash(npx podcast-helper:*), Bash(node dist/cli.js:*), Bash(pnpm run build:*)
 ---
 
-# Transcribe with podcast-helper
+# Transcribe and Clean with podcast-helper
 
 `podcast-helper` is a CLI for podcast download and transcription workflows.
 
@@ -15,10 +15,12 @@ Use this skill when the user wants any of the following:
 - Transcribe a local audio file
 - Generate subtitle files (`.srt`)
 - Generate plain transcript files (`.txt`)
+- Clean a raw transcript after transcription
+- Fix obvious ASR mistakes with episode-page context
 
 ## Inputs
 
-The `transcribe` command accepts exactly one input:
+The main `transcribe` command accepts exactly one input:
 
 - A Xiaoyuzhou episode URL
 - A direct audio URL such as `.mp3` or `.m4a`
@@ -36,6 +38,7 @@ podcast-helper transcribe ./audio/interview.mp3 --output-dir ./out/local --json
 
 - `ELEVENLABS_API_KEY` must be set
 - The CLI must be installed or available from the repository
+- Cleanup with Jina Reader is optional and does not require ElevenLabs
 
 Check the API key first if transcription is expected to run:
 
@@ -80,6 +83,26 @@ Typical JSON output:
 }
 ```
 
+## Default Workflow
+
+Use this order by default:
+
+1. Transcribe with `podcast-helper`
+2. Report the generated artifact paths
+3. Ask whether the user also wants cleanup
+4. If yes, fetch episode-page context through Jina Reader and produce a cleaned sibling transcript
+
+Suggested follow-up question:
+
+```text
+Do you want me to clean the transcript as well?
+```
+
+When cleanup is requested, keep the raw transcript unchanged and write a sibling file:
+
+- Raw: `episode.txt`
+- Cleaned: `episode.cleaned.txt`
+
 ## Execution Strategy
 
 Use this order of preference:
@@ -107,7 +130,52 @@ node dist/cli.js transcribe <input> --output-dir <dir> --json
 - Use a dedicated output directory per task.
 - Report the generated artifact paths back to the user.
 - If the input is a Xiaoyuzhou episode, the CLI resolves and downloads the source audio automatically.
-- After transcription, if the user appears to want a polished transcript, ask whether they also want cleanup. If yes, switch to the `clean-transcript` skill.
+- After transcription, if the user appears to want a polished transcript, ask whether they also want cleanup.
+
+## Cleanup Workflow
+
+Use this branch when:
+
+- The user says yes to cleanup after transcription
+- The user already has a raw `.txt` transcript and wants it polished
+
+Recommended inputs:
+
+- The original podcast URL
+- The raw transcript file, usually `.txt`
+
+Optional but useful:
+
+- The `.srt` file
+- The original audio file
+
+Fetch the episode page through Jina Reader:
+
+```bash
+curl https://r.jina.ai/<podcast-url>
+```
+
+For example:
+
+```bash
+curl https://r.jina.ai/https://www.xiaoyuzhoufm.com/episode/69b4d2f9f8b8079bfa3ae7f2
+```
+
+Use the page content as reference context to:
+
+- Fix obvious homophone and ASR mistakes
+- Recover names, products, titles, and other proper nouns
+- Remove repeated filler words and disfluencies when they are clearly redundant
+- Normalize punctuation and paragraph breaks for readability
+
+Apply conservative cleanup:
+
+- Preserve speaker intent and factual content
+- Do not invent missing material
+- Do not summarize instead of cleaning
+- Do not overwrite the raw transcript
+
+If the episode URL is unavailable, clean conservatively using transcript-only evidence and state that no external episode context was used.
 
 ## Failure Modes
 
@@ -117,6 +185,12 @@ If transcription fails:
 - Verify the input URL is reachable
 - Re-run with a fresh output directory
 - If using the repository build, run `pnpm run check` and `pnpm run build`
+
+If cleanup quality is uncertain:
+
+- Verify the podcast URL matches the transcript
+- Re-fetch the Jina Reader page and inspect whether it contains useful episode metadata
+- Prefer fewer edits when the page does not provide enough grounding
 
 ## Install This Skill
 
