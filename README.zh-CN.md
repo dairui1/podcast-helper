@@ -6,7 +6,7 @@
 
 当前项目先聚焦一个明确可用的场景：
 
-- 解析小宇宙单集链接
+- 解析多个主流播客平台的单集链接
 - 解析公开播客单集页面，只要页面暴露了直接音频元数据或可发现的 RSS/Atom feed
 - 接受直接音频 URL
 - 接受本地音频文件
@@ -20,7 +20,7 @@
 
 当前支持：
 
-- 来源：小宇宙单集链接、通用公开播客单集页面、直接音频 URL、本地音频文件
+- 来源：小宇宙、Apple Podcasts、YouTube（通过 yt-dlp）、Spotify（检测 + DRM 提示）、Pocket Casts、Castro、喜马拉雅、Podcast Addict、通用公开播客单集页面、直接音频 URL、本地音频文件
 - 转录后端：
   `elevenlabs`、`openai`、`groq`、`deepgram`、`gladia`、`assemblyai`、`revai`，以及 Apple Silicon 上的本地 `mlx-whisper`
 - 输出：原始音频、`.srt`、`.txt`
@@ -28,10 +28,23 @@
 
 接下来计划：
 
-- 支持更多播客站点
 - 优化字幕分段和文本清洗
 - 增加本地 STT 后端
 - 发布 npm 包
+
+## 支持的平台
+
+| 平台 | 策略 | 说明 |
+|------|------|------|
+| **小宇宙** | 专用适配器 | 中文播客最热门平台 |
+| **Apple Podcasts** | iTunes Lookup API + RSS 兜底 | `podcasts.apple.com` 单集链接 |
+| **YouTube** | `yt-dlp` 提取音频 | 需要安装 `yt-dlp` |
+| **Spotify** | 仅检测 | DRM 保护，提示用户找 RSS 替代 |
+| **Pocket Casts** | oEmbed → embed 页面 | `pca.st` 分享链接 |
+| **Castro** | HTML 音频提取 | `castro.fm` 单集链接 |
+| **喜马拉雅** | 移动端音轨 API | `ximalaya.com` 免费音轨 |
+| **Podcast Addict** | URL 编码音频路径 | `podcastaddict.com` 单集链接 |
+| **通用** | og:audio / RSS / audio 标签 / JSON-LD | 任何公开单集页面的兜底方案 |
 
 ## 环境要求
 

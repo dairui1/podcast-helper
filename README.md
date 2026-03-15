@@ -6,7 +6,7 @@
 
 The project currently focuses on one concrete workflow:
 
-- Resolve a Xiaoyuzhou episode URL
+- Resolve a podcast episode URL from many major platforms
 - Resolve a public podcast episode page that exposes direct audio metadata or a discoverable RSS/Atom feed
 - Accept a direct remote audio URL
 - Accept a local audio file
@@ -21,7 +21,8 @@ This project is early but functional.
 Current scope:
 
 - Source:
-  Xiaoyuzhou episode URLs,
+  Xiaoyuzhou, Apple Podcasts, YouTube (via yt-dlp), Spotify (detection + DRM notice),
+  Pocket Casts, Castro, Ximalaya, Podcast Addict,
   generic public podcast episode pages,
   direct audio URLs,
   and local audio files
@@ -32,10 +33,23 @@ Current scope:
 
 Planned next:
 
-- More podcast source adapters
 - Better subtitle segmentation and transcript cleanup
 - Local STT backends
 - npm publishing
+
+## Supported Platforms
+
+| Platform | Strategy | Notes |
+|----------|----------|-------|
+| **Xiaoyuzhou** (小宇宙) | Dedicated adapter | China's top podcast platform |
+| **Apple Podcasts** | iTunes Lookup API, RSS fallback | `podcasts.apple.com` episode URLs |
+| **YouTube** | `yt-dlp` audio extraction | Requires `yt-dlp` installed |
+| **Spotify** | Detection only | DRM-protected; prompts user to find RSS alternative |
+| **Pocket Casts** | oEmbed → embed page | `pca.st` share links |
+| **Castro** | HTML audio extraction | `castro.fm` episode links |
+| **Ximalaya** (喜马拉雅) | Mobile track API | Free tracks on `ximalaya.com` |
+| **Podcast Addict** | URL-encoded audio path | `podcastaddict.com` episode links |
+| **Generic** | og:audio / RSS / audio tags / JSON-LD | Fallback for any public episode page |
 
 ## Requirements
 
