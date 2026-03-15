@@ -7,6 +7,7 @@
 当前项目先聚焦一个明确可用的场景：
 
 - 解析小宇宙单集链接
+- 解析公开播客单集页面，只要页面暴露了直接音频元数据或可发现的 RSS/Atom feed
 - 接受直接音频 URL
 - 接受本地音频文件
 - 下载原始音频
@@ -19,8 +20,9 @@
 
 当前支持：
 
-- 来源：小宇宙单集链接、直接音频 URL、本地音频文件
-- 转录后端：ElevenLabs Speech to Text、Apple Silicon 上的本地 `mlx-whisper`
+- 来源：小宇宙单集链接、通用公开播客单集页面、直接音频 URL、本地音频文件
+- 转录后端：
+  `elevenlabs`、`openai`、`groq`、`deepgram`、`gladia`、`assemblyai`、`revai`，以及 Apple Silicon 上的本地 `mlx-whisper`
 - 输出：原始音频、`.srt`、`.txt`
 - 工具链：`pnpm + biome + vitest + tsup`
 
@@ -34,8 +36,25 @@
 ## 环境要求
 
 - Node.js 20+
-- 如果使用 ElevenLabs，需要可用的 `ELEVENLABS_API_KEY`
+- 如果使用远程转录，需要至少一个 provider key：
+  `ELEVENLABS_API_KEY`、`OPENAI_API_KEY`、`GROQ_API_KEY`、`DEEPGRAM_API_KEY`、`GLADIA_API_KEY`、`ASSEMBLYAI_API_KEY`、`REVAI_API_KEY`
 - 如果使用本地 Apple Silicon 转录，需要 `ffmpeg` 和 `python3 -m pip install mlx-whisper`
+
+## 默认引擎选择
+
+`podcast-helper` 会自动选择转录引擎：
+
+- 如果本地 `mlx-whisper` 可用，优先走 `mlx-whisper`
+- `ELEVENLABS_API_KEY` -> `elevenlabs`
+- `OPENAI_API_KEY` -> `openai`
+- `GROQ_API_KEY` -> `groq`
+- `DEEPGRAM_API_KEY` -> `deepgram`
+- `GLADIA_API_KEY` -> `gladia`
+- `ASSEMBLYAI_API_KEY` -> `assemblyai`
+- `REVAI_API_KEY` -> `revai`
+- 如果本地 `mlx-whisper` 不可用且以上都没有，就会回退到 `mlx-whisper`，此时需要先安装本地依赖才能成功运行
+
+如果需要，也可以显式传 `--engine <provider>` 覆盖默认行为。
 
 ## 用户快速开始
 
@@ -46,18 +65,26 @@ npx podcast-helper --help
 pnpm dlx podcast-helper --help
 ```
 
-转录播客单集或音频文件：
+转录播客单集页面或音频文件：
 
 ```bash
-export ELEVENLABS_API_KEY=你的_key
 npx podcast-helper transcribe https://www.xiaoyuzhoufm.com/episode/69b4d2f9f8b8079bfa3ae7f2 --output-dir ./out/episode --json
 ```
 
-低成本 smoke test：
+通用单集页面支持最适合这类公开页面：
+
+- 页面里有 `og:audio` 之类的音频元数据
+- 页面里有 `<audio>` 或 `<source>` 标签
+- 页面里有 JSON-LD `AudioObject` 或 `PodcastEpisode`
+- 页面里有一个能回指当前单集页的 RSS / Atom feed
+
+这意味着很多常见 host 的公开单集页都不需要专门 adapter 就能工作，比如基于 Buzzsprout、Libsyn、Simplecast、Podbean、Transistor、Castos、Omny、Acast、Spreaker 搭建的页面。
+
+显式使用 OpenAI 做转录：
 
 ```bash
-export ELEVENLABS_API_KEY=你的_key
-pnpm dlx podcast-helper transcribe https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3 --output-dir ./out/smoke --json
+export OPENAI_API_KEY=你的_key
+pnpm dlx podcast-helper transcribe https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3 --engine openai --output-dir ./out/openai --json
 ```
 
 Apple Silicon 本地转录，使用 `mlx-whisper`：
@@ -113,21 +140,25 @@ node dist/cli.js --help
 转录一个小宇宙单集：
 
 ```bash
-export ELEVENLABS_API_KEY=你的_key
 npx podcast-helper transcribe https://www.xiaoyuzhoufm.com/episode/69b4d2f9f8b8079bfa3ae7f2 --output-dir ./out/episode --json
 ```
 
-转录一个直接音频 URL：
+转录一个通过通用 HTML 或 feed 元数据发现音频的公开播客单集页面：
 
 ```bash
-export ELEVENLABS_API_KEY=你的_key
-pnpm dlx podcast-helper transcribe https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3 --output-dir ./out/smoke --json
+npx podcast-helper transcribe https://example.fm/episodes/42 --output-dir ./out/episode-page --json
 ```
 
-转录一个本地音频文件：
+显式用 Groq 转录一个直接音频 URL：
 
 ```bash
-export ELEVENLABS_API_KEY=你的_key
+export GROQ_API_KEY=你的_key
+pnpm dlx podcast-helper transcribe https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3 --engine groq --output-dir ./out/groq --json
+```
+
+按默认引擎选择转录一个本地音频文件：
+
+```bash
 podcast-helper transcribe ./audio/interview.mp3 --output-dir ./out/local --json
 ```
 
@@ -190,6 +221,18 @@ skill 文件在：
 npx podcast-helper transcribe <input> --output-dir <dir> --json
 pnpm dlx podcast-helper transcribe <input> --output-dir <dir> --json
 ```
+
+如果省略 `--engine`：
+
+- 本地 `mlx-whisper` 可用时优先走 `mlx-whisper`
+- `ELEVENLABS_API_KEY` 时走 `elevenlabs`
+- `OPENAI_API_KEY` 时走 `openai`
+- `GROQ_API_KEY` 时走 `groq`
+- `DEEPGRAM_API_KEY` 时走 `deepgram`
+- `GLADIA_API_KEY` 时走 `gladia`
+- `ASSEMBLYAI_API_KEY` 时走 `assemblyai`
+- `REVAI_API_KEY` 时走 `revai`
+- 其他情况走 `mlx-whisper`
 
 对于本地 Apple Silicon 转录，这条工作流现在默认包含：
 

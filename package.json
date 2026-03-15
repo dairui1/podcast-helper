@@ -1,6 +1,6 @@
 {
   "name": "podcast-helper",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Podcast CLI utilities for downloading and transcribing podcast episodes.",
   "license": "MIT",
   "type": "module",
@@ -52,7 +52,13 @@
     "prepublishOnly": "pnpm run check && pnpm run build"
   },
   "dependencies": {
+    "@ai-sdk/assemblyai": "^2.0.24",
+    "@ai-sdk/deepgram": "^2.0.24",
     "@ai-sdk/elevenlabs": "2.0.24",
+    "@ai-sdk/gladia": "^2.0.24",
+    "@ai-sdk/groq": "^3.0.29",
+    "@ai-sdk/openai": "^3.0.41",
+    "@ai-sdk/revai": "^2.0.24",
     "ai": "6.0.116",
     "commander": "14.0.3"
   },

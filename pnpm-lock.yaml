@@ -8,8 +8,26 @@ importers:
 
   .:
     dependencies:
+      '@ai-sdk/assemblyai':
+        specifier: ^2.0.24
+        version: 2.0.24(zod@4.3.6)
+      '@ai-sdk/deepgram':
+        specifier: ^2.0.24
+        version: 2.0.24(zod@4.3.6)
       '@ai-sdk/elevenlabs':
         specifier: 2.0.24
+        version: 2.0.24(zod@4.3.6)
+      '@ai-sdk/gladia':
+        specifier: ^2.0.24
+        version: 2.0.24(zod@4.3.6)
+      '@ai-sdk/groq':
+        specifier: ^3.0.29
+        version: 3.0.29(zod@4.3.6)
+      '@ai-sdk/openai':
+        specifier: ^3.0.41
+        version: 3.0.41(zod@4.3.6)
+      '@ai-sdk/revai':
+        specifier: ^2.0.24
         version: 2.0.24(zod@4.3.6)
       ai:
         specifier: 6.0.116
@@ -39,6 +57,18 @@ importers:
 
 packages:
 
+  '@ai-sdk/assemblyai@2.0.24':
+    resolution: {integrity: sha512-/Ps4e/32l0pwAbJjIHHBk77YH9WxEt7ZWf2rcGWAiuPa15YVZFqGL/iCtHixjHtE7Mq4y1QV9xe8+1LTfztZlA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/deepgram@2.0.24':
+    resolution: {integrity: sha512-htT1Y7vBN0cRu/1pGnhx6DNH3xaNr0o0MjDkmii48X2+6S/WkOzVNtMjn7V3vLWEQIWNio5vw1hG/F43K8WLHA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/elevenlabs@2.0.24':
     resolution: {integrity: sha512-K+1YprVMO8R6vTcNhqTqUWhOzX5V/hEY0pFx9KQL0/+MJjOgRi6DcOLoNBd7ONcjxYTyiFLRfk/0a/pHTtSgFA==}
     engines: {node: '>=18'}
@@ -47,6 +77,24 @@ packages:
 
   '@ai-sdk/gateway@3.0.66':
     resolution: {integrity: sha512-SIQ0YY0iMuv+07HLsZ+bB990zUJ6S4ujORAh+Jv1V2KGNn73qQKnGO0JBk+w+Res8YqOFSycwDoWcFlQrVxS4A==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/gladia@2.0.24':
+    resolution: {integrity: sha512-xeRDMG4sh2i57iBy2YgNmFJUgT7dqJXg/Aa9ytZ8KWyYH2Nj9FwkS3V92JaZrrwXS7e6gmJmIGECiGN3ED9+cA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/groq@3.0.29':
+    resolution: {integrity: sha512-I/tUoHuOvGXbIr1dJ0CLRLA7W0UPDMtrYT5mgeb3O+P+6I5BAm/7riPwr22Xw5YTzpwQxcoDQlIczOU9XDXBpA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/openai@3.0.41':
+    resolution: {integrity: sha512-IZ42A+FO+vuEQCVNqlnAPYQnnUpUfdJIwn1BEDOBywiEHa23fw7PahxVtlX9zm3/zMvTW4JKPzWyvAgDu+SQ2A==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -60,6 +108,12 @@ packages:
   '@ai-sdk/provider@3.0.8':
     resolution: {integrity: sha512-oGMAgGoQdBXbZqNG0Ze56CHjDZ1IDYOwGYxYjO5KLSlz5HiNQ9udIXsPZ61VWaHGZ5XW/jyjmr6t2xz2jGVwbQ==}
     engines: {node: '>=18'}
+
+  '@ai-sdk/revai@2.0.24':
+    resolution: {integrity: sha512-HDrPvJCdKF2pyTxXJixF52M1RgTmHTtgI37yESKECBAZfID3tjhm8Ei3FsXrtVuv3SEHzGQpZnWek+IRVYRhmA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
 
   '@biomejs/biome@2.4.7':
     resolution: {integrity: sha512-vXrgcmNGZ4lpdwZSpMf1hWw1aWS6B+SyeSYKTLrNsiUsAdSRN0J4d/7mF3ogJFbIwFFSOL3wT92Zzxia/d5/ng==}
@@ -1059,6 +1113,18 @@ packages:
 
 snapshots:
 
+  '@ai-sdk/assemblyai@2.0.24(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.19(zod@4.3.6)
+      zod: 4.3.6
+
+  '@ai-sdk/deepgram@2.0.24(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.19(zod@4.3.6)
+      zod: 4.3.6
+
   '@ai-sdk/elevenlabs@2.0.24(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
@@ -1072,6 +1138,24 @@ snapshots:
       '@vercel/oidc': 3.1.0
       zod: 4.3.6
 
+  '@ai-sdk/gladia@2.0.24(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.19(zod@4.3.6)
+      zod: 4.3.6
+
+  '@ai-sdk/groq@3.0.29(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.19(zod@4.3.6)
+      zod: 4.3.6
+
+  '@ai-sdk/openai@3.0.41(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.19(zod@4.3.6)
+      zod: 4.3.6
+
   '@ai-sdk/provider-utils@4.0.19(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
@@ -1082,6 +1166,12 @@ snapshots:
   '@ai-sdk/provider@3.0.8':
     dependencies:
       json-schema: 0.4.0
+
+  '@ai-sdk/revai@2.0.24(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.19(zod@4.3.6)
+      zod: 4.3.6
 
   '@biomejs/biome@2.4.7':
     optionalDependencies:

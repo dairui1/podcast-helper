@@ -241,4 +241,74 @@ describe("transcribe workflow", () => {
 
     await rm(sessionDir, { recursive: true, force: true });
   });
+
+  test("defaults to chunking for mlx-whisper providers when chunk duration is omitted", async () => {
+    const sourceAudioPath = join(tempDir, "episode.mp3");
+    await writeFile(sourceAudioPath, Buffer.from("source-audio"));
+
+    const chunker = vi.fn(async ({ chunkDurationSec }: { chunkDurationSec: number }) => {
+      expect(chunkDurationSec).toBe(300);
+
+      return [
+        {
+          index: 0,
+          audioPath: sourceAudioPath,
+          offsetMs: 0,
+        },
+      ];
+    });
+
+    const provider: SttProvider = {
+      name: "mlx-whisper",
+      async transcribe() {
+        return {
+          text: "Only chunk.\n",
+          segments: [{ startMs: 0, endMs: 1_000, text: "Only chunk." }],
+          language: "en",
+        };
+      },
+    };
+
+    await transcribeInput({
+      input: sourceAudioPath,
+      outputDir: tempDir,
+      sourceAdapters: [],
+      provider,
+      audioChunker: chunker,
+    });
+
+    expect(chunker).toHaveBeenCalledTimes(1);
+  });
+
+  test("does not chunk by default for elevenlabs providers when chunk duration is omitted", async () => {
+    const sourceAudioPath = join(tempDir, "episode.mp3");
+    await writeFile(sourceAudioPath, Buffer.from("source-audio"));
+
+    const chunker = vi.fn(async () => {
+      throw new Error("chunker should not run");
+    });
+
+    const provider: SttProvider = {
+      name: "elevenlabs",
+      async transcribe({ audioPath }: { audioPath: string }) {
+        expect(audioPath.endsWith(".mp3")).toBe(true);
+
+        return {
+          text: "Single pass.\n",
+          segments: [{ startMs: 0, endMs: 1_000, text: "Single pass." }],
+          language: "en",
+        };
+      },
+    };
+
+    await transcribeInput({
+      input: sourceAudioPath,
+      outputDir: tempDir,
+      sourceAdapters: [],
+      provider,
+      audioChunker: chunker,
+    });
+
+    expect(chunker).not.toHaveBeenCalled();
+  });
 });

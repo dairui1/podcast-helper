@@ -11,6 +11,7 @@ allowed-tools: Bash(curl:*), Bash(podcast-helper:*), Bash(npx podcast-helper:*),
 Use this skill when the user wants any of the following:
 
 - Transcribe a Xiaoyuzhou episode URL
+- Transcribe a public podcast episode page that exposes audio metadata or a discoverable RSS/Atom feed
 - Transcribe a direct remote audio URL
 - Transcribe a local audio file
 - Generate subtitle files (`.srt`)
@@ -18,12 +19,14 @@ Use this skill when the user wants any of the following:
 - Clean a raw transcript after transcription
 - Fix obvious ASR mistakes with episode-page context
 - Run local transcription on Apple Silicon
+- Use a specific AI SDK transcription provider such as OpenAI, Groq, Deepgram, Gladia, AssemblyAI, or Rev.ai
 
 ## Inputs
 
 The main `transcribe` command accepts exactly one input:
 
 - A Xiaoyuzhou episode URL
+- A public podcast episode page URL
 - A direct audio URL such as `.mp3` or `.m4a`
 - A local audio file path
 
@@ -31,9 +34,19 @@ Examples:
 
 ```bash
 npx podcast-helper transcribe https://www.xiaoyuzhoufm.com/episode/69b4d2f9f8b8079bfa3ae7f2 --output-dir ./out/episode --json
+npx podcast-helper transcribe https://example.fm/episodes/42 --output-dir ./out/episode-page --json
 npx podcast-helper transcribe https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3 --output-dir ./out/smoke --json
 npx podcast-helper transcribe ./audio/interview.mp3 --output-dir ./out/local --json
 ```
+
+Generic episode-page support works best when the page exposes:
+
+- `og:audio` or similar audio metadata
+- `<audio>` or `<source>` tags
+- JSON-LD `AudioObject` or `PodcastEpisode`
+- an alternate RSS or Atom feed that links back to the current episode page
+
+That covers many host-powered public pages without a dedicated adapter, including pages commonly built on Buzzsprout, Libsyn, Simplecast, Podbean, Transistor, Castos, Omny, Acast, and Spreaker.
 
 ## Requirements
 
@@ -43,6 +56,15 @@ npx podcast-helper transcribe ./audio/interview.mp3 --output-dir ./out/local --j
 For ElevenLabs runs:
 
 - `ELEVENLABS_API_KEY` must be set
+
+Other supported remote providers:
+
+- `OPENAI_API_KEY` -> `openai`
+- `GROQ_API_KEY` -> `groq`
+- `DEEPGRAM_API_KEY` -> `deepgram`
+- `GLADIA_API_KEY` -> `gladia`
+- `ASSEMBLYAI_API_KEY` -> `assemblyai`
+- `REVAI_API_KEY` -> `revai`
 
 For Apple Silicon local transcription with `mlx-whisper`:
 
@@ -55,18 +77,25 @@ Check the API key first if transcription is expected to run:
 printenv ELEVENLABS_API_KEY
 ```
 
+Default engine selection:
+
+- If local `mlx-whisper` is available, omit `--engine` and let the CLI use `mlx-whisper`
+- Else if `ELEVENLABS_API_KEY` is present, omit `--engine` and let the CLI use `elevenlabs`
+- Else if `OPENAI_API_KEY` is present, omit `--engine` and let the CLI use `openai`
+- Else if `GROQ_API_KEY` is present, omit `--engine` and let the CLI use `groq`
+- Else if `DEEPGRAM_API_KEY` is present, omit `--engine` and let the CLI use `deepgram`
+- Else if `GLADIA_API_KEY` is present, omit `--engine` and let the CLI use `gladia`
+- Else if `ASSEMBLYAI_API_KEY` is present, omit `--engine` and let the CLI use `assemblyai`
+- Else if `REVAI_API_KEY` is present, omit `--engine` and let the CLI use `revai`
+- Otherwise omit `--engine` and let the CLI fall back to `mlx-whisper`
+- Use `--engine <provider>` only when you need to force a specific backend
+
 ## Preferred Command Form
 
 Prefer machine-readable output:
 
 ```bash
 npx podcast-helper transcribe <input> --output-dir <dir> --json
-```
-
-For Apple Silicon local transcription:
-
-```bash
-npx podcast-helper transcribe <input> --engine mlx-whisper --output-dir <dir> --json
 ```
 
 The local workflow defaults to:
@@ -135,6 +164,8 @@ Use this order of preference:
 4. In this repository: `node dist/cli.js transcribe ...`
 
 If the user explicitly wants local transcription on Apple Silicon, prefer `--engine mlx-whisper`.
+If the user explicitly wants a specific hosted backend, prefer `--engine <provider>`.
+Otherwise let the CLI choose based on the available provider API keys.
 
 Do not default to repository build instructions unless you are already working inside this repository.
 
@@ -158,7 +189,8 @@ node dist/cli.js transcribe <input> --output-dir <dir> --json
 - Report the generated artifact paths back to the user.
 - Prefer `npx` or `pnpm dlx` when the user does not already have the CLI installed.
 - If the user wants local or offline transcription on Apple Silicon, switch to `--engine mlx-whisper`.
-- If the input is a Xiaoyuzhou episode, the CLI resolves and downloads the source audio automatically.
+- If the user has not asked for a specific backend, check the available provider API keys and let the CLI choose automatically.
+- If the input is a Xiaoyuzhou episode or a public podcast episode page, the CLI resolves and downloads the source audio automatically.
 - After transcription, if the user appears to want a polished transcript, ask whether they also want cleanup.
 
 ## Cleanup Workflow
@@ -210,7 +242,9 @@ If the episode URL is unavailable, clean conservatively using transcript-only ev
 
 If transcription fails:
 
-- Verify `ELEVENLABS_API_KEY` is present
+- Verify which backend was selected
+- If a hosted backend was selected, verify the matching API key is present
+- If local `mlx-whisper` was selected, verify `ffmpeg` and `mlx-whisper` are installed
 - Verify the input URL is reachable
 - Re-run with a fresh output directory
 - If using the repository build, run `pnpm run check` and `pnpm run build`

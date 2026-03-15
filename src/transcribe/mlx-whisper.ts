@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -27,6 +27,11 @@ interface CommandRunnerInput {
   onStderrLine?: (line: string) => void;
 }
 
+interface MlxWhisperAvailabilityOptions {
+  pythonExecutable?: string;
+  helperScriptPath?: string;
+}
+
 type CommandRunner = (input: CommandRunnerInput) => Promise<CommandResult>;
 
 interface MlxWhisperPayload {
@@ -45,7 +50,7 @@ export function createMlxWhisperProvider(
   options: CreateMlxWhisperProviderOptions = {}
 ): SttProvider {
   const runner = options.runner ?? runCommand;
-  const pythonExecutable = options.pythonExecutable ?? "python3";
+  const pythonExecutable = resolvePythonExecutable(options.pythonExecutable);
   const helperScriptPath = options.helperScriptPath ?? resolveHelperScriptPath();
 
   return {
@@ -146,6 +151,46 @@ export function createMlxWhisperProvider(
       }
     },
   };
+}
+
+export function isMlxWhisperAvailable(
+  options: MlxWhisperAvailabilityOptions = {}
+): boolean {
+  try {
+    const pythonExecutable = resolvePythonExecutable(options.pythonExecutable);
+    const helperScriptPath = options.helperScriptPath ?? resolveHelperScriptPath();
+
+    if (!existsSync(helperScriptPath)) {
+      return false;
+    }
+
+    const result = spawnSync(
+      pythonExecutable,
+      [
+        "-c",
+        "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('mlx_whisper') else 1)",
+      ],
+      {
+        env: process.env,
+        encoding: "utf8",
+        stdio: "ignore",
+        timeout: 10_000,
+      }
+    );
+
+    return result.status === 0;
+  } catch {
+    return false;
+  }
+}
+
+function resolvePythonExecutable(pythonExecutable?: string): string {
+  return (
+    pythonExecutable ??
+    process.env.PODCAST_HELPER_PYTHON ??
+    process.env.MLX_WHISPER_PYTHON ??
+    "python3"
+  );
 }
 
 function resolveHelperScriptPath(): string {

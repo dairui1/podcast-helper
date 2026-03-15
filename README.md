@@ -7,6 +7,7 @@
 The project currently focuses on one concrete workflow:
 
 - Resolve a Xiaoyuzhou episode URL
+- Resolve a public podcast episode page that exposes direct audio metadata or a discoverable RSS/Atom feed
 - Accept a direct remote audio URL
 - Accept a local audio file
 - Download the original audio
@@ -19,8 +20,13 @@ This project is early but functional.
 
 Current scope:
 
-- Source: Xiaoyuzhou episode URLs, direct audio URLs, local audio files
-- Transcription backends: ElevenLabs Speech to Text, local `mlx-whisper` on Apple Silicon
+- Source:
+  Xiaoyuzhou episode URLs,
+  generic public podcast episode pages,
+  direct audio URLs,
+  and local audio files
+- Transcription backends:
+  `elevenlabs`, `openai`, `groq`, `deepgram`, `gladia`, `assemblyai`, `revai`, and local `mlx-whisper` on Apple Silicon
 - Outputs: original audio, `.srt`, `.txt`
 - Toolchain: `pnpm + biome + vitest + tsup`
 
@@ -34,8 +40,25 @@ Planned next:
 ## Requirements
 
 - Node.js 20+
-- An `ELEVENLABS_API_KEY` for the ElevenLabs engine
+- One provider API key for remote transcription:
+  `ELEVENLABS_API_KEY`, `OPENAI_API_KEY`, `GROQ_API_KEY`, `DEEPGRAM_API_KEY`, `GLADIA_API_KEY`, `ASSEMBLYAI_API_KEY`, or `REVAI_API_KEY`
 - `ffmpeg` and `python3 -m pip install mlx-whisper` for local Apple Silicon transcription
+
+## Default Engine Selection
+
+`podcast-helper` chooses the transcription engine automatically:
+
+- If local `mlx-whisper` is available, it uses `mlx-whisper` first
+- `ELEVENLABS_API_KEY` -> `elevenlabs`
+- `OPENAI_API_KEY` -> `openai`
+- `GROQ_API_KEY` -> `groq`
+- `DEEPGRAM_API_KEY` -> `deepgram`
+- `GLADIA_API_KEY` -> `gladia`
+- `ASSEMBLYAI_API_KEY` -> `assemblyai`
+- `REVAI_API_KEY` -> `revai`
+- If local `mlx-whisper` is unavailable and none of the above are set, it falls back to `mlx-whisper` and the local run will fail until `mlx-whisper` is installed
+
+You can always override this with `--engine <provider>`.
 
 ## User Quick Start
 
@@ -46,18 +69,26 @@ npx podcast-helper --help
 pnpm dlx podcast-helper --help
 ```
 
-Transcribe a podcast episode or audio file:
+Transcribe a podcast episode page or audio file:
 
 ```bash
-export ELEVENLABS_API_KEY=your_key
 npx podcast-helper transcribe https://www.xiaoyuzhoufm.com/episode/69b4d2f9f8b8079bfa3ae7f2 --output-dir ./out/episode --json
 ```
 
-Low-cost smoke test:
+Generic episode-page support works best for public podcast pages that expose:
+
+- `og:audio` or similar audio metadata
+- `<audio>` or `<source>` tags
+- JSON-LD `AudioObject` or `PodcastEpisode`
+- an alternate RSS or Atom feed that links back to the current episode page
+
+That covers many host-powered public pages without a dedicated adapter, including pages commonly built on Buzzsprout, Libsyn, Simplecast, Podbean, Transistor, Castos, Omny, Acast, and Spreaker.
+
+Force OpenAI explicitly:
 
 ```bash
-export ELEVENLABS_API_KEY=your_key
-pnpm dlx podcast-helper transcribe https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3 --output-dir ./out/smoke --json
+export OPENAI_API_KEY=your_key
+pnpm dlx podcast-helper transcribe https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3 --engine openai --output-dir ./out/openai --json
 ```
 
 Apple Silicon local transcription with `mlx-whisper`:
@@ -113,21 +144,25 @@ node dist/cli.js --help
 Transcribe a Xiaoyuzhou episode:
 
 ```bash
-export ELEVENLABS_API_KEY=your_key
 npx podcast-helper transcribe https://www.xiaoyuzhoufm.com/episode/69b4d2f9f8b8079bfa3ae7f2 --output-dir ./out/episode --json
 ```
 
-Transcribe a direct audio URL:
+Transcribe a public podcast episode page discovered through generic HTML or feed metadata:
 
 ```bash
-export ELEVENLABS_API_KEY=your_key
-pnpm dlx podcast-helper transcribe https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3 --output-dir ./out/smoke --json
+npx podcast-helper transcribe https://example.fm/episodes/42 --output-dir ./out/episode-page --json
 ```
 
-Transcribe a local audio file:
+Transcribe a direct audio URL with Groq:
 
 ```bash
-export ELEVENLABS_API_KEY=your_key
+export GROQ_API_KEY=your_key
+pnpm dlx podcast-helper transcribe https://storage.googleapis.com/eleven-public-cdn/audio/marketing/nicole.mp3 --engine groq --output-dir ./out/groq --json
+```
+
+Transcribe a local audio file with automatic engine selection:
+
+```bash
 podcast-helper transcribe ./audio/interview.mp3 --output-dir ./out/local --json
 ```
 
@@ -190,6 +225,18 @@ The skill teaches agents to prefer no-install entry points first:
 npx podcast-helper transcribe <input> --output-dir <dir> --json
 pnpm dlx podcast-helper transcribe <input> --output-dir <dir> --json
 ```
+
+When `--engine` is omitted:
+
+- local `mlx-whisper` available: use `mlx-whisper`
+- `ELEVENLABS_API_KEY`: use `elevenlabs`
+- `OPENAI_API_KEY`: use `openai`
+- `GROQ_API_KEY`: use `groq`
+- `DEEPGRAM_API_KEY`: use `deepgram`
+- `GLADIA_API_KEY`: use `gladia`
+- `ASSEMBLYAI_API_KEY`: use `assemblyai`
+- `REVAI_API_KEY`: use `revai`
+- otherwise: use `mlx-whisper`
 
 For local Apple Silicon runs, the workflow now uses:
 

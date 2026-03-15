@@ -19,20 +19,24 @@ program
   .command("transcribe")
   .argument("<input>", "Episode URL, direct audio URL, or local audio file")
   .option("-o, --output-dir <dir>", "Directory for generated artifacts", process.cwd())
-  .option("--engine <engine>", "Transcription engine: elevenlabs or mlx-whisper", "elevenlabs")
+  .option(
+    "--engine <engine>",
+    "Transcription engine: auto, elevenlabs, openai, groq, deepgram, gladia, assemblyai, revai, or mlx-whisper",
+    "auto"
+  )
   .option(
     "--model <model>",
-    "Transcription model. ElevenLabs uses a model id; mlx-whisper uses a local path or Hugging Face repo."
+    "Transcription model. Hosted providers use provider-specific model ids; mlx-whisper uses a local path or Hugging Face repo."
   )
   .option("--language <code>", "Force transcription language")
   .option(
     "--python-executable <path>",
     "Python interpreter for local mlx-whisper runs",
-    process.env.PODCAST_HELPER_PYTHON || "python3"
+    process.env.PODCAST_HELPER_PYTHON || process.env.MLX_WHISPER_PYTHON || "python3"
   )
   .option(
     "--chunk-duration <seconds>",
-    "Chunk duration in seconds. Defaults to 300 for mlx-whisper and 0 for elevenlabs."
+    "Chunk duration in seconds. Defaults to 300 for mlx-whisper and 0 for hosted providers; auto follows the selected engine."
   )
   .option("--keep-temp", "Keep the per-request temp workspace for debugging", false)
   .option(
