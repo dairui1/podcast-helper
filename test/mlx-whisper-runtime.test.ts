@@ -18,6 +18,13 @@ describe("mlx-whisper runtime helpers", () => {
     vi.stubEnv("PODCAST_HELPER_HOME", tempDir);
     vi.stubEnv("PODCAST_HELPER_PYTHON", "");
     vi.stubEnv("MLX_WHISPER_PYTHON", "");
+    vi.stubEnv("ELEVENLABS_API_KEY", "");
+    vi.stubEnv("OPENAI_API_KEY", "");
+    vi.stubEnv("GROQ_API_KEY", "");
+    vi.stubEnv("DEEPGRAM_API_KEY", "");
+    vi.stubEnv("GLADIA_API_KEY", "");
+    vi.stubEnv("ASSEMBLYAI_API_KEY", "");
+    vi.stubEnv("REVAI_API_KEY", "");
   });
 
   afterEach(async () => {
