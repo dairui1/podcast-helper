@@ -1,6 +1,6 @@
 {
   "name": "podcast-helper",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Podcast CLI utilities for downloading and transcribing podcast episodes.",
   "license": "MIT",
   "type": "module",
