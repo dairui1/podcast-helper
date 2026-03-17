@@ -265,6 +265,13 @@ The skill lives at:
 
 - [skills/transcribe/SKILL.md](./skills/transcribe/SKILL.md)
 
+Distribution:
+
+- `skills.sh` has no separate publish step. This repository is installable with `npx skills add dairui1/podcast-helper --skill transcribe`, and the skill shows up on `skills.sh` after users install it.
+- ClawHub supports explicit publishing from the same skill directory. This repository includes [`.github/workflows/publish-skills.yml`](./.github/workflows/publish-skills.yml), which publishes every skill in `./skills` to ClawHub when a GitHub release is published or when the workflow is run manually.
+- Configure the repository secret `CLAWHUB_TOKEN` before using the ClawHub workflow.
+- Skill metadata versions should stay semver because ClawHub publish expects semver, for example `1.4.0`.
+
 The skill teaches agents to prefer no-install entry points first:
 
 ```bash

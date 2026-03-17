@@ -1,0 +1,68 @@
+name: Publish Skills
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.discover.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Build skill publish matrix
+        id: discover
+        run: |
+          matrix="$(node scripts/skill-release-matrix.mjs)"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  publish-clawhub:
+    name: Publish ${{ matrix.slug }} to ClawHub
+    needs: discover
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - name: Ensure ClawHub token is configured
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+        run: |
+          if [ -z "$CLAWHUB_TOKEN" ]; then
+            echo "CLAWHUB_TOKEN secret is required to publish skills to ClawHub." >&2
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Install ClawHub CLI
+        run: npm install --global clawhub
+
+      - name: Login to ClawHub
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+        run: clawhub login --token "$CLAWHUB_TOKEN" --no-browser
+
+      - name: Publish skill
+        run: |
+          clawhub publish "${{ matrix.path }}" \
+            --slug "${{ matrix.slug }}" \
+            --name "${{ matrix.display_name }}" \
+            --version "${{ matrix.version }}" \
+            --tags latest

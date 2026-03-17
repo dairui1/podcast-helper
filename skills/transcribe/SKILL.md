@@ -3,7 +3,7 @@ name: transcribe
 description: "Use podcast-helper to transcribe podcast URLs, public audio URLs/files, or raw transcripts into audio + SRT + TXT artifacts, with optional transcript cleanup from episode-page context. Trigger for subtitle requests, transcript extraction, podcast episode URLs, or transcript polishing. Prefer no-install `npx podcast-helper` or `pnpm dlx podcast-helper`, report artifact paths, and ask before cleanup."
 allowed-tools: Bash(curl:*), Bash(podcast-helper:*), Bash(npx podcast-helper:*), Bash(pnpm dlx podcast-helper:*), Bash(node dist/cli.js:*), Bash(pnpm run build:*)
 metadata:
-  version: "1.4"
+  version: "1.4.0"
   tags: [podcast, transcription, audio, subtitles, asr, cleanup]
 ---
 
