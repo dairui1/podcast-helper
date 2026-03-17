@@ -64,7 +64,7 @@ jobs:
       - name: Publish skill
         run: |
           clawhub publish "${{ matrix.path }}" \
-            --slug "${{ github.event.repository.name }}-${{ matrix.slug }}" \
+            --slug "${{ matrix.clawhub_slug }}" \
             --name "${{ matrix.display_name }}" \
             --version "${{ matrix.version }}" \
             --tags latest

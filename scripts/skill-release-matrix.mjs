@@ -60,6 +60,7 @@ async function listSkillMatrix() {
     }
 
     let displayName = slug;
+    let clawhubSlug = slug;
     const openAiYamlPath = join(
       skillsRoot.pathname,
       entry.name,
@@ -74,7 +75,24 @@ async function listSkillMatrix() {
       // Default to the slug when the UI metadata file is absent.
     }
 
+    const clawhubJsonPath = join(
+      skillsRoot.pathname,
+      entry.name,
+      "agents",
+      "clawhub.json"
+    );
+
+    try {
+      const clawhubConfig = JSON.parse(await readFile(clawhubJsonPath, "utf8"));
+      if (typeof clawhubConfig.slug === "string" && clawhubConfig.slug.length > 0) {
+        clawhubSlug = clawhubConfig.slug;
+      }
+    } catch {
+      // Default to the skill slug when there is no ClawHub override file.
+    }
+
     skills.push({
+      clawhub_slug: clawhubSlug,
       display_name: displayName,
       path: `./${relativeDir}`,
       slug,

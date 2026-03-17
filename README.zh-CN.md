@@ -264,6 +264,7 @@ skill 文件在：
 
 - `skills.sh` 没有单独的 publish 步骤。这个仓库可以直接通过 `npx skills add dairui1/podcast-helper --skill transcribe` 安装，用户安装之后会被动出现在 `skills.sh`。
 - ClawHub 支持从同一个 skill 目录显式发布。仓库里新增了 [`.github/workflows/publish-skills.yml`](./.github/workflows/publish-skills.yml)，在 GitHub release 发布后，或手动触发 workflow 时，会把 `./skills` 下的 skill 发布到 ClawHub。
+- 如果某个 skill 需要一个和本地 skill 名不同、但长期稳定的 ClawHub slug，可以在 `skills/<skill>/agents/clawhub.json` 里覆盖。
 - 使用 ClawHub workflow 前，需要先配置仓库 secret `CLAWHUB_TOKEN`。
 - skill 的 `metadata.version` 现在建议始终使用 semver，例如 `1.4.0`，因为 ClawHub publish 需要 semver。
 
