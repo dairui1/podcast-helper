@@ -1,0 +1,64 @@
+test/live.mlx-whisper.test.ts
+  5977a48e7eca01cf 16
+skills/transcribe/references/inputs-and-engines.md
+  5977a48e7eca01cf 56,62
+test/cli-support.test.ts
+  5977a48e7eca01cf 53,73,88,90-91
+test/elevenlabs-provider.test.ts
+  5977a48e7eca01cf 12
+test/transcribe-workflow.test.ts
+  5977a48e7eca01cf 16,197
+src/transcribe/workflow.ts
+  5977a48e7eca01cf 59
+src/cli.ts
+  5977a48e7eca01cf 31,41,64
+src/transcribe/mlx-whisper-runtime.ts
+  5977a48e7eca01cf 27,91-92,119-120,122-123,294,298,423
+src/transcribe/mlx-whisper.ts
+  5977a48e7eca01cf 66,259
+skills/transcribe/references/verification.md
+  5977a48e7eca01cf 12,27-28
+test/live.transcribe.test.ts
+  5977a48e7eca01cf 16
+package.json
+  5977a48e7eca01cf 2,10,12,14,28
+test/mlx-whisper-provider.test.ts
+  5977a48e7eca01cf 12
+test/mlx-whisper-runtime.test.ts
+  5977a48e7eca01cf 17-19,66
+README.md
+  5977a48e7eca01cf 1,5,63,82-83,89,95,111,117-118,121,126,132-133,168,174,181,187,193-194,200,230,232-233,255,261,270,292-293,315-316,356-357
+skills/transcribe/references/setup.md
+  5977a48e7eca01cf 10,16,37,51,66-67
+src/cli-support.ts
+  5977a48e7eca01cf 84,163-164,231,342,358,361
+test/ai-sdk-remote.test.ts
+  5977a48e7eca01cf 73,115,142,171
+skills/transcribe/references/output-contract.md
+  5977a48e7eca01cf 6
+README.zh-CN.md
+  5977a48e7eca01cf 1,5,58,77-78,84,90,106,112-113,116,121,127-128,163,169,176,182,188-189,195,225,227-228,250,256,265,287-288,310-311,351-352
+skills/transcribe/SKILL.md
+  5977a48e7eca01cf 4,10,17,27,33,41,46-47,53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "4f5a469dd46139fc027d94a07641b0f0b978818e",
+  "prompts": {
+    "5977a48e7eca01cf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b74bbc17-9eb6-48bf-9ff0-09fcdc807c73",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "linyongcong",
+      "messages": [],
+      "total_additions": 950,
+      "total_deletions": 134,
+      "accepted_lines": 950,
+      "overriden_lines": 0,
+      "messages_url": "https://usegitai.com/cas/99b8b57f3674c7f1a7218702ac884106deb27755ed04d277e1bb2a4b791c6fbd"
+    }
+  }
+}
